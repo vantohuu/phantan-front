@@ -6,7 +6,7 @@ import Router from "next/router";
 
 import { redirect, useRouter } from "next/navigation";
 import Header from "@/components/Header";
-export default function Login() {
+export default function Account() {
   const onFinish = (values: any) => {
     console.log("Success:", values);
   };
@@ -19,7 +19,7 @@ export default function Login() {
     password?: string;
   };
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isSuccess, setIsSuccess] = useState<boolean>(true);
+  const [isSuccess, setIsSuccess] = useState<boolean>();
   const [status, setStatus] = useState<String>("failed");
   const router = useRouter();
 
@@ -38,7 +38,6 @@ export default function Login() {
         headers: {
           "Content-Type": "application/json",
         },
-        // mode: "no-cors",
         body: JSON.stringify({
           username: userName,
           password: passWord,
@@ -50,12 +49,12 @@ export default function Login() {
       setStatus(data.status);
       if (data.status == "success") {
         setIsSuccess(true);
+        router.push("/");
       } else {
         setIsSuccess(false);
       }
       console.log(isSuccess);
       localStorage.setItem("username", userName);
-      router.push("/");
     } catch (error) {
       console.error(error);
     } finally {
@@ -101,13 +100,6 @@ export default function Login() {
                 <Input.Password />
               </Form.Item>
 
-              <p
-                className={
-                  isSuccess ? "text-green-500 mb-5" : "text-rose-600 mb-5"
-                }
-              >
-                {isSuccess ? "" : "Wrong password or username"}
-              </p>
               <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
                 <Button
                   loading={isLoading}
@@ -119,6 +111,13 @@ export default function Login() {
                 </Button>
               </Form.Item>
             </Form>
+            <p
+              className={
+                isSuccess ? "text-green-500 mb-5" : "text-rose-600 mb-5"
+              }
+            >
+              {isSuccess == false ? "Wrong password or username" : ""}
+            </p>
           </div>
         </div>
       </div>

@@ -3,6 +3,7 @@ import ModelCancel from "@/components/ModelCancelOrder";
 import { Modal } from "antd";
 import React, { useEffect, useState } from "react";
 import Loading from "./loading";
+import Header from "@/components/Header";
 
 // import Header from "@/components/Header";
 type CTVeType = {
@@ -17,7 +18,6 @@ type VeType = {
   username?: string;
   status?: number;
 };
-// let username = localStorage.getItem("username");
 
 export default function Home() {
   const [data, setData] = useState([]);
@@ -25,8 +25,9 @@ export default function Home() {
   const [ctVe, setCtVe] = useState<CTVeType>({});
   const [isLoading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // const [isOrdered, setIsOrdered] = useState(false);
-
+  const [username, setUsername] = useState<string>(
+    localStorage.getItem("username") || ""
+  );
   const onFinish = (values: any) => {
     console.log("Success:", values);
   };
@@ -36,18 +37,20 @@ export default function Home() {
   };
 
   const handleOnClick = (event: any, item: any) => {
-    // let item = event.target.data;
-
-    setVe({ id: item.idve, username: item.username, status: 0 });
-    setCtVe({
-      username: item.username || "",
-      idve: item.idve,
-      status: item.status,
-    });
-    console.log("ve", ve);
-
-    console.log("ctVe", ctVe);
-    setIsModalOpen(true);
+    setUsername(localStorage.getItem("username") || "");
+    if (!username) window.location.href = "/login";
+    console.log(username, item.username);
+    if (item.username == username || item.status == 0) {
+      setVe({ id: item.idve, username: username || "", status: 0 });
+      setCtVe({
+        username: username || "",
+        idve: item.idve,
+        status: item.status,
+      });
+      console.log("ve", ve);
+      console.log("ctVe", ctVe);
+      setIsModalOpen(true);
+    }
   };
 
   const handleOk = () => {
@@ -71,7 +74,8 @@ export default function Home() {
         headers: {
           "content-type": "application/json",
           "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "DELETE, POST, GET, OPTIONS",
+          "Access-Control-Allow-Methods": "DELETE, POST, GET, PUT, OPTIONS",
+          "Sec-Fetch-Site": "none",
         },
         // mode: "no-cors",
       })
@@ -100,7 +104,8 @@ export default function Home() {
   if (isLoading) return <Loading></Loading>;
   return (
     <>
-      <div className="fixed w-screen h-screen">
+      <audio src="xo-so-mien-bac.mp3" autoPlay loop></audio>
+      <div className="fixed w-screen h-screen  bg-[url('/train-bg.jpg')] bg-cover bg-center ">
         <Modal
           title={`Xác nhận vé số ${ve.id}`}
           open={isModalOpen}
@@ -113,24 +118,29 @@ export default function Home() {
               : "Bạn có muốn đặt vé không?"}
           </p>
         </Modal>
-        <div className="w-full h-full bg-[url('/train-bg.jpg')] bg-cover bg-center flex justify-center items-center">
-          <div className=" drop-shadow-2xl flex flex-col justify-center items-center w-full h-full rounded-xl mb-[100px]">
-            <div className="grid grid-cols-5 gap-20">
+        <div className="w-full h-full flex-col justify-center items-center">
+          <Header isHomePage={true}></Header>
+          <div className=" drop-shadow-2xl flex flex-col justify-center items-center w-full h-full rounded-xl ">
+            <div className="grid grid-cols-5 gap-20 mb-[100px]">
               {data.map((item: any) => {
                 if (item)
                   return (
                     <div
                       className={`h-[80px] w-[200px] rounded flex flex-col justify-center items-center  ${
                         item.status == 0
-                          ? " bg-green-200 hover:bg-green-400"
-                          : " bg-rose-200 hover:bg-rose-400"
+                          ? "bg-rose-200 hover:bg-rose-400"
+                          : item.username == username
+                          ? "bg-green-200 hover:bg-green-400"
+                          : "bg-slate-200 hover:bg-slate-400"
                       }`}
                       onClick={(e) => handleOnClick(e, item)}
                     >
-                      <div> Vé số {item.idve}</div>
+                      <div className="font-bold"> Vé số {item.idve}</div>
                       <div>
                         {" "}
-                        {item.status == 1 ? item.username : "Chưa đặt"}
+                        {item.status == 1
+                          ? "Vé đã đặt bởi: " + item.username
+                          : "Chưa đặt"}
                       </div>
                       {/* <div> {item.status == 1 ? item.create_at : ""}</div> */}
                     </div>
