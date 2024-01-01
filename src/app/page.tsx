@@ -28,6 +28,10 @@ export default function Home() {
   const [username, setUsername] = useState<string>(
     localStorage.getItem("username") || ""
   );
+
+  if (!username) {
+    window.location.href = "/login";
+  }
   const onFinish = (values: any) => {
     console.log("Success:", values);
   };
