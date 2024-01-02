@@ -1,11 +1,12 @@
 "use client";
-import ModelCancel from "@/components/ModelCancelOrder";
 import { Modal } from "antd";
 import React, { useEffect, useState } from "react";
 import Loading from "./loading";
 import Header from "@/components/Header";
+import { Button, notification, Space } from "antd";
 
-// import Header from "@/components/Header";
+type NotificationType = "success" | "info" | "warning" | "error";
+
 type CTVeType = {
   idve?: number;
   username?: string;
@@ -24,11 +25,20 @@ export default function Home() {
   const [ve, setVe] = useState<VeType>({});
   const [ctVe, setCtVe] = useState<CTVeType>({});
   const [isLoading, setLoading] = useState(false);
+  const [status, setStatus] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [username, setUsername] = useState<string>(
     localStorage.getItem("username") || ""
   );
-
+  // const [messageApi, contextHolder] = message.useMessage();
+  type NotificationType = "success" | "info" | "warning" | "error";
+  const [api, contextHolder] = notification.useNotification();
+  const openNotificationWithIcon = (type: NotificationType) => {
+    api[type]({
+      message: "Thông báo",
+      description: "Cập nhật thành công",
+    });
+  };
   if (!username) {
     window.location.href = "/login";
   }
@@ -68,8 +78,8 @@ export default function Home() {
       })
         .then((res) => res.json())
         .then((data) => {
-          // setData(data);
           setLoading(false);
+          // setStatus(data.status);
         });
     } else {
       fetch(`${process.env.API_DEV}/ve/order-ticket`, {
@@ -81,12 +91,13 @@ export default function Home() {
           "Access-Control-Allow-Methods": "DELETE, POST, GET, PUT, OPTIONS",
           "Sec-Fetch-Site": "none",
         },
-        // mode: "no-cors",
       })
         .then((res) => res.json())
         .then((data) => {
-          // setData(data);
+          console.log("test", data);
           setLoading(false);
+          // openNotificationWithIcon("success");
+          // console.log("notification");
         });
     }
   };
@@ -100,21 +111,21 @@ export default function Home() {
       .then((res) => res.json())
       .then((data) => {
         setData(data);
-        console.log(data);
       });
+    if (isLoading) openNotificationWithIcon("success");
   }, [isLoading]);
 
-  // console.log(data);
   if (isLoading) return <Loading></Loading>;
   return (
     <>
-      <audio src="xo-so-mien-bac.mp3" autoPlay loop></audio>
+      {/* <audio src="xo-so-mien-bac.mp3" autoPlay loop></audio> */}
       <div className="fixed w-screen h-screen  bg-[url('/train-bg.jpg')] bg-cover bg-center ">
         <Modal
           title={`Xác nhận vé số ${ve.id}`}
           open={isModalOpen}
           onOk={handleOk}
           onCancel={handleCancel}
+          okButtonProps={{ className: "bg-black" }}
         >
           <p>
             {ctVe.status == 1
@@ -124,6 +135,7 @@ export default function Home() {
         </Modal>
         <div className="w-full h-full flex-col justify-center items-center">
           <Header isHomePage={true}></Header>
+          {contextHolder}
           <div className=" drop-shadow-2xl flex flex-col justify-center items-center w-full h-full rounded-xl ">
             <div className="grid grid-cols-5 gap-20 mb-[100px]">
               {data.map((item: any) => {
@@ -146,7 +158,6 @@ export default function Home() {
                           ? "Vé đã đặt bởi: " + item.username
                           : "Chưa đặt"}
                       </div>
-                      {/* <div> {item.status == 1 ? item.create_at : ""}</div> */}
                     </div>
                   );
               })}

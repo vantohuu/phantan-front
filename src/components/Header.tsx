@@ -6,6 +6,7 @@ export default function Header(props: any) {
 
   const setLogin = () => {
     setIsLogin(true);
+    localStorage.clear();
   };
 
   const setSignUp = () => {
@@ -55,8 +56,8 @@ export default function Header(props: any) {
                 isLogin ? "bg-pink-200" : "bg-pink-100"
               } mx-3 me-5 p-2  rounded  hover:bg-pink-200 hover:scale-x-110`}
             >
-              <Link onClick={setLogin} className="mx-10" href="/login">
-                Đăng xuất
+              <Link onClick={setSignUp} className="mx-10" href="/account">
+                Tài khoản
               </Link>
             </div>
             <div
@@ -64,8 +65,8 @@ export default function Header(props: any) {
                 !isLogin ? "bg-pink-200" : "bg-pink-100"
               } mx-3 me-10 p-2  rounded hover:bg-pink-200 hover:scale-x-110`}
             >
-              <Link onClick={setSignUp} className="mx-10" href="/account">
-                Tài khoản
+              <Link onClick={setLogin} className="mx-10" href="/login">
+                Đăng xuất
               </Link>
             </div>
           </div>
