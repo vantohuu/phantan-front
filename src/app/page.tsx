@@ -159,7 +159,7 @@ export default function Home() {
       .then((data) => {
         setData(data);
       });
-    openNotificationWithIcon("success");
+    // openNotificationWithIcon("success");
   }, [isLoading, update]);
 
   if (isLoading) return <Loading></Loading>;
