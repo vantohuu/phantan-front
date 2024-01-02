@@ -1,9 +1,11 @@
 "use client";
 import { Modal } from "antd";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Loading from "./loading";
 import Header from "@/components/Header";
 import { Button, notification, Space } from "antd";
+import Stomp from "stompjs";
+import SockJS from "sockjs-client";
 
 type NotificationType = "success" | "info" | "warning" | "error";
 
@@ -25,13 +27,56 @@ export default function Home() {
   const [ve, setVe] = useState<VeType>({});
   const [ctVe, setCtVe] = useState<CTVeType>({});
   const [isLoading, setLoading] = useState(false);
-  const [status, setStatus] = useState<string>("");
+  const [update, setUpdate] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [username, setUsername] = useState<string>(
     localStorage.getItem("username") || ""
   );
-  // const [messageApi, contextHolder] = message.useMessage();
-  type NotificationType = "success" | "info" | "warning" | "error";
+  const socketUrl = `${process.env.API_WS}/gs-guide-websocket`;
+
+  const [messageHistory, setMessageHistory] = useState([]);
+
+  const [messages, setMessages] = useState([]);
+  const [message, setMessage] = useState("");
+  const [nickname, setNickname] = useState("");
+  const [stompClient, setStompClient] = useState(null);
+
+  useEffect(() => {
+    const socket = new SockJS("http://localhost:8080/ws");
+    const client = Stomp.over(socket);
+
+    client.connect({}, () => {
+      client.subscribe("/topic/messages", (message: any) => {
+        const receivedMessage = JSON.parse(message.body);
+        // console.log("message.body", receivedMessage);
+        setUpdate(receivedMessage);
+
+        // console.log("message.body");
+
+        // setMessages((prevMessages:any) => [...prevMessages, receivedMessage]);
+      });
+    });
+
+    setStompClient(client);
+
+    // return () => {
+    //   client.disconnect();
+    // };
+  }, []);
+
+  const sendMessage = () => {
+    // if (message.trim()) {
+    const chatMessage = {
+      name: "message",
+    };
+    stompClient &&
+      stompClient.send("/app/chat", {}, JSON.stringify(chatMessage));
+
+    // setMessage("");
+    // }
+    // console.log("Sended message");
+  };
+
   const [api, contextHolder] = notification.useNotification();
   const openNotificationWithIcon = (type: NotificationType) => {
     api[type]({
@@ -61,8 +106,8 @@ export default function Home() {
         idve: item.idve,
         status: item.status,
       });
-      console.log("ve", ve);
-      console.log("ctVe", ctVe);
+      // console.log("ve", ve);
+      // console.log("ctVe", ctVe);
       setIsModalOpen(true);
     }
   };
@@ -79,6 +124,7 @@ export default function Home() {
         .then((res) => res.json())
         .then((data) => {
           setLoading(false);
+          sendMessage();
           // setStatus(data.status);
         });
     } else {
@@ -95,6 +141,7 @@ export default function Home() {
         .then((res) => res.json())
         .then((data) => {
           console.log("test", data);
+          sendMessage();
           setLoading(false);
           // openNotificationWithIcon("success");
           // console.log("notification");
@@ -112,8 +159,8 @@ export default function Home() {
       .then((data) => {
         setData(data);
       });
-    if (isLoading) openNotificationWithIcon("success");
-  }, [isLoading]);
+    openNotificationWithIcon("success");
+  }, [isLoading, update]);
 
   if (isLoading) return <Loading></Loading>;
   return (

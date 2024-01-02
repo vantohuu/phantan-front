@@ -10,9 +10,12 @@
   },
   "dependencies": {
     "antd": "^5.12.1",
+    "lodash": "^4.17.21",
     "next": "14.0.4",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "react-stomp": "^5.1.0",
+    "react-use-websocket": "^4.5.0"
   },
   "devDependencies": {
     "@types/node": "^20",
