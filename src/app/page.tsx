@@ -32,7 +32,7 @@ export default function Home() {
   const [username, setUsername] = useState<string>(
     localStorage.getItem("username") || ""
   );
-  const socketUrl = `${process.env.API_WS}/gs-guide-websocket`;
+  // const socketUrl = `${process.env.API_WS}/gs-guide-websocket`;
 
   const [messageHistory, setMessageHistory] = useState([]);
 
@@ -42,7 +42,7 @@ export default function Home() {
   const [stompClient, setStompClient] = useState(null);
 
   useEffect(() => {
-    const socket = new SockJS("http://localhost:8080/ws");
+    const socket = new SockJS(`${process.env.API_DEV}/ws`);
     const client = Stomp.over(socket);
 
     client.connect({}, () => {
